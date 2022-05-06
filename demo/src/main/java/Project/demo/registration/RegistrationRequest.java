@@ -1,4 +1,4 @@
-package Project.demo.AppUser.registration;
+package Project.demo.registration;
 
 import java.util.Objects;
 

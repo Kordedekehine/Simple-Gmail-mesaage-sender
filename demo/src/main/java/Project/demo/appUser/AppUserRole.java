@@ -1,4 +1,4 @@
-package Project.demo.AppUser;
+package Project.demo.appUser;
 
 public enum AppUserRole {
 

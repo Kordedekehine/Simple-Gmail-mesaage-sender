@@ -1,4 +1,4 @@
-package Project.demo.AppUser;
+package Project.demo.appUser;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,29 +16,29 @@ public class AppUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "student_sequence")
     private Long id;
-    private String username;
-    private String name;
+    private String lastname;
+    private String firstname;
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)
     private AppUserRole appUserRole;
-    private Boolean locked;
-    private Boolean enabled;
+    private Boolean locked = false;
+    private Boolean enabled = false;
 
-    public AppUser(String username, String name, String email, String password, AppUserRole appUserRole,
-                   Boolean locked, Boolean enabled) {
-        this.username = username;
-        this.name = name;
+    public AppUser(String lastname, String firstname, String email, String password, AppUserRole appUserRole) {
+        this.lastname = lastname;
+        this.firstname = firstname;
         this.email = email;
         this.password = password;
         this.appUserRole = appUserRole;
-        this.locked = locked;
-        this.enabled = enabled;
+    }
+
+    public AppUser() {
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        //to grant authority to a specific name
+        //to grant authority to a specific firstname
         SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(appUserRole.name());
         return Collections.singletonList(simpleGrantedAuthority);
     }
@@ -50,7 +50,7 @@ public class AppUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override
@@ -81,16 +81,16 @@ public class AppUser implements UserDetails {
         this.id = id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstname() {
+        return firstname;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
     }
 
     public String getEmail() {
@@ -134,11 +134,11 @@ public class AppUser implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppUser appUser = (AppUser) o;
-        return Objects.equals(id, appUser.id) && Objects.equals(username, appUser.username) && Objects.equals(name, appUser.name) && Objects.equals(email, appUser.email) && Objects.equals(password, appUser.password) && appUserRole == appUser.appUserRole && Objects.equals(locked, appUser.locked) && Objects.equals(enabled, appUser.enabled);
+        return Objects.equals(id, appUser.id) && Objects.equals(lastname, appUser.lastname) && Objects.equals(firstname, appUser.firstname) && Objects.equals(email, appUser.email) && Objects.equals(password, appUser.password) && appUserRole == appUser.appUserRole && Objects.equals(locked, appUser.locked) && Objects.equals(enabled, appUser.enabled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, name, email, password, appUserRole, locked, enabled);
+        return Objects.hash(id, lastname, firstname, email, password, appUserRole, locked, enabled);
     }
 }
