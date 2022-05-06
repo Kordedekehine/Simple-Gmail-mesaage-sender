@@ -1,0 +1,51 @@
+#spring.datasource.url=jdbc:postgresql://localhost:5432/registration
+#spring.datasource.username=Admin
+#spring.datasource.password=Admin
+#spring.datasource.driver-class-name=org.postgresql.Driver
+#spring.jpa.hibernate.ddl-auto=create-drop
+#spring.datasource.initialization-mode=always
+
+#server.error.include-message=always
+#
+#spring.mail.host=localhost
+#spring.mail.port=1025
+#spring.mail.userName=Admin
+#spring.mail.password=Admin
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  datasource:
+    password:
+    url: jdbc:postgresql://localhost:5432/registration
+    username:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+  mail:
+    host: localhost
+    port: 1025
+    username: hello
+    password: hello
+
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: "*"
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+

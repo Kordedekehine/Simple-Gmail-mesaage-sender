@@ -1,10 +1,9 @@
 package Project.demo.registration;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+@RequestMapping(path = "api/v1/registration")
+@RestController
 public class RegistrationController {
 
     private final RegistrationService registrationService;
@@ -14,12 +13,12 @@ public class RegistrationController {
     }
 
     @PostMapping
-    public String registers(@RequestBody RegistrationRequest request) {
+    public String register(@RequestBody RegistrationRequest request) {
         return registrationService.register(request);
     }
 
     @GetMapping(path = "confirm")
-    public String confirm(@RequestParam("token") String token) {
-        return registrationService.confirmToken(token);
+    public String confirm(@RequestParam("confirm") String token) {
+        return registrationService.confirm(token);
     }
 }
