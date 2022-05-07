@@ -1,4 +1,4 @@
-package Project.demo.registration.token;
+package Project.demo.registration;
 
 import org.springframework.stereotype.Service;
 

@@ -1,0 +1,389 @@
+
+1. Update User Entity Class and Database Table
+Update the User entity class to ensure that it includes the 2 fields verificationCode and enabled, as shown below:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Column(name = "verification_code", length = 64)
+    private String verificationCode;
+
+    private boolean enabled;
+
+    // other fields, getters and setters are not shown
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+The field verificationCode stores a random, unique String which is generated in the registration process and will be used in the verification process. Once registered, the enabled status of a user is false (disabled) so the user can’t login if he has not activated account by checking email and click on the verification link embedded in the email.
+And make sure that the database table users having the corresponding fields verification_code and enabled, as shown below:
+table users
+
+
+
+
+Instead of alter the users table manually, you can run the application with the property spring.jpa.hibernate.ddl-auto is set to update in the application.properties file. Also note the length of verification code is 64 characters.
+
+2. Update UserDetails class
+Next, you need to update your custom UserDetails class that wraps a User object, as shown below:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+import org.springframework.security.core.userdetails.UserDetails;
+
+public class CustomUserDetails implements UserDetails {
+
+    private User user;
+
+    public CustomUserDetails(User user) {
+        this.user = user;
+    }
+
+
+    @Override
+    public boolean isEnabled() {
+        return user.isEnabled();
+    }
+
+    // other methods are not shown...
+
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+Here, we override the isEnabled() method that returns the user’s enabled status with value from database, so Spring Security will inject login if the user has not verified his account, i.e. the error message “User is disabled” in the login page.
+
+3. Using JavaMail in Spring Boot
+In order to send verification email, you need to declare the following dependency in the Maven project file (pom.xml), as follows:
+1
+2
+3
+4
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency><div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+Spring Boot Mail is a thin API wrapper around Jakarta Mail (the new name of JavaMail), which helps programming email functionality more easily.
+Then you need to configure some properties for a SMTP server in the Spring Boot application configuration file, as shown below:
+1
+2
+3
+4
+5
+6
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email_address
+spring.mail.password=your_email_password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+Here I use GMail’s SMTP. If you also use GMail, you need to turn on SMTP in your Google Account settings. Of course you can use SMTP settings of your own email server.
+
+4. Update User Registration for Sending Verification Email
+Next, you need to update the code of the registration process for sending a verification link to the user’s email. Firstly, update the UserServices class to use a JavaMailSender and have register() and sendVerificationEmail() methods as shown below:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+@Service
+public class UserServices {
+
+    @Autowired
+    private UserRepository repo;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+
+    public void register(User user, String siteURL) {
+
+    }
+
+    private void sendVerificationEmail(User user, String siteURL) {
+
+    }
+
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+Update the register() method as follows:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+public void register(User user, String siteURL)
+        throws UnsupportedEncodingException, MessagingException {
+    String encodedPassword = passwordEncoder.encode(user.getPassword());
+    user.setPassword(encodedPassword);
+
+    String randomCode = RandomString.make(64);
+    user.setVerificationCode(randomCode);
+    user.setEnabled(false);
+
+    repo.save(user);
+
+    sendVerificationEmail(user, siteURL);
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+Here, you can see the verification code is generated using the RandomString class which is from the package net.bytebuddy.utility of the ByteBuddy library comes with Spring Boot (so you don’t have to import any external library for that).
+And code the sendVerificationEmail() method as follows:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+private void sendVerificationEmail(User user, String siteURL)
+        throws MessagingException, UnsupportedEncodingException {
+    String toAddress = user.getEmail();
+    String fromAddress = "Your email address";
+    String senderName = "Your company name";
+    String subject = "Please verify your registration";
+    String content = "Dear [[name]],<br>"
+            + "Please click the link below to verify your registration:<br>"
+            + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
+            + "Thank you,<br>"
+            + "Your company name.";
+
+    MimeMessage message = mailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(message);
+
+    helper.setFrom(fromAddress, senderName);
+    helper.setTo(toAddress);
+    helper.setSubject(subject);
+
+    content = content.replace("[[name]]", user.getFullName());
+    String verifyURL = siteURL + "/verify?code=" + user.getVerificationCode();
+
+    content = content.replace("[[URL]]", verifyURL);
+
+    helper.setText(content, true);
+
+    mailSender.send(message);
+
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+This method will send an email to the user’s email (captured from the signup form), with the verification hyperlink includes the verification code. The value of siteURL is sent from the controller.
+Next, you need to update the Spring MVC controller class as follows:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+@Controller
+public class AppController {
+
+    @Autowired
+    private UserServices service;
+
+
+    @PostMapping("/process_register")
+    public String processRegister(User user, HttpServletRequest request)
+            throws UnsupportedEncodingException, MessagingException {
+        service.register(user, getSiteURL(request));
+        return "register_success";
+    }
+
+    private String getSiteURL(HttpServletRequest request) {
+        String siteURL = request.getRequestURL().toString();
+        return siteURL.replace(request.getServletPath(), "");
+    }
+
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+The processRegister() method handles submission of the registration form (see: Spring Boot Registration and Login with MySQL Database Tutorial) and the getSiteURL() method returns the real context path of the web application, so the verification link will work when the user opens the email.
+Lastly, update the registration success page to display the appropriate message as shown below:
+1
+2
+3
+4
+5
+<div class="container text-center">
+    <h3>You have signed up successfully!</h3>
+    <p>Please check your email to verify your account.</p>
+    <h4><a th:href="/@{/login}">Click here to Login</a></h4>
+</div><div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+Now, you can test the user registration function to see the verification email. Once registered, the user would see the following page:
+registration succeeded
+Check email, and the content would look like this (in GMail):
+verification email content
+Click the VERIFY link in the email, and you can see the URL has the following format:
+http://siteURL/verify?code=verification_code
+In the next section, I’ll show you how to implement the verification process that takes place when the user clicks the verify link in the email.
+
+5. Implement User Account Verification Functionality
+Firstly, update the UserRepository interface to declare a new method for retrieving a User object based on verification code, as shown below:
+1
+2
+3
+4
+5
+6
+7
+8
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Query("SELECT u FROM User u WHERE u.verificationCode = ?1")
+    public User findByVerificationCode(String code);
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+Then add the following method in the UserServices class:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+public boolean verify(String verificationCode) {
+    User user = repo.findByVerificationCode(verificationCode);
+
+    if (user == null || user.isEnabled()) {
+        return false;
+    } else {
+        user.setVerificationCode(null);
+        user.setEnabled(true);
+        repo.save(user);
+
+        return true;
+    }
+
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+As you can see, if a user is found by the given verification code, the application will activate the user account by updating the verification code to null and enabled status to true (so Spring Security will allow login for that user).
+And implement the following handler method in the controller as follows:
+1
+2
+3
+4
+5
+6
+7
+8
+@GetMapping("/verify")
+public String verifyUser(@Param("code") String code) {
+    if (service.verify(code)) {
+        return "verify_success";
+    } else {
+        return "verify_fail";
+    }
+}<div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+As you can see, it returns the view name based on verification result. Below is the main code of the verify success page:
+1
+2
+3
+4
+<div class="container text-center">
+    <h3>Congratulations, your account has been verified.</h3>
+    <h4><a th:href="/@{/login}">Click here to Login</a></h4>
+</div><div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+And the body code of the verify fail page:
+1
+2
+3
+4
+<div class="container text-center">
+    <h3>Sorry, we could not verify account. It maybe already verified,
+        or verification code is incorrect.</h3>
+</div><div class="open_grepper_editor" title="Edit & Save To Grepper"></div>
+That’s for the implementation of verification process.
+
+6. Test User Registration Verification Email
+Click the VERIFY link in the email, the user would see the following page:
+verify success
+If somehow the verification code is incorrect, or the user was verified, the following page should be displayed:
+verify fail
+Also check the table users in the database to make sure that the values of verification code and enabled status were updated properly. Then try to login with the newly approved account.
+So far you have learned how to implement user verification email functionality in a Spring Boot application. To see the coding in action, I recommend you to watch the following video:

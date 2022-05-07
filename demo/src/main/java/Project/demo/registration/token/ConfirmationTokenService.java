@@ -10,7 +10,7 @@ public class ConfirmationTokenService {
 
     private final ConfirmationTokenRepository confirmationTokenRepository;
 
-    public ConfirmationTokenService(Project.demo.registration.token.ConfirmationTokenRepository confirmationTokenRepository) {
+    public ConfirmationTokenService(ConfirmationTokenRepository confirmationTokenRepository) {
         this.confirmationTokenRepository = confirmationTokenRepository;
     }
 

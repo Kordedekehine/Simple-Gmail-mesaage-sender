@@ -18,6 +18,7 @@ public class EmailService implements EmailSender{
     private final static Logger LOGGER = LoggerFactory //sl4js
             .getLogger(EmailService.class);
 
+    @Autowired
     private final JavaMailSender javaMailSender;
 
     public EmailService(JavaMailSender javaMailSender) {

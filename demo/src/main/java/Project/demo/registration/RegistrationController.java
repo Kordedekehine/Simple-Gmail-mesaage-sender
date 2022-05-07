@@ -2,6 +2,7 @@ package Project.demo.registration;
 
 import org.springframework.web.bind.annotation.*;
 
+
 @RequestMapping(path = "api/v1/registration")
 @RestController
 public class RegistrationController {
@@ -11,6 +12,7 @@ public class RegistrationController {
     public RegistrationController(RegistrationService registrationService) {
         this.registrationService = registrationService;
     }
+
 
     @PostMapping
     public String register(@RequestBody RegistrationRequest request) {

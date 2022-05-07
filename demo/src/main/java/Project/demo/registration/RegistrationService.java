@@ -6,7 +6,6 @@ import Project.demo.appUser.AppUserService;
 import Project.demo.email.EmailSender;
 import Project.demo.registration.token.ConfirmationToken;
 import Project.demo.registration.token.ConfirmationTokenService;
-import Project.demo.registration.token.EmailValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
