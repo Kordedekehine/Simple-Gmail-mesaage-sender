@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
-public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationToken,Long> {
+@Transactional(readOnly = true)
+public interface ConfirmationTokenRepository
+        extends JpaRepository<ConfirmationToken, Long> {
 
     Optional<ConfirmationToken> findByToken(String token);
 
@@ -20,6 +22,5 @@ public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationT
             "SET c.confirmedAt = ?2 " +
             "WHERE c.token = ?1")
     int updateConfirmedAt(String token,
-                          LocalDateTime confirmedAt); //Here we want to save the particular time the client confirmed their
-    //token verification
+                          LocalDateTime confirmedAt);
 }

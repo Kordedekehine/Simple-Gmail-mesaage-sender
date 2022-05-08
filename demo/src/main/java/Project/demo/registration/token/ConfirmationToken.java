@@ -2,33 +2,43 @@ package Project.demo.registration.token;
 
 import Project.demo.appUser.AppUser;
 
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+
 @Entity
 public class ConfirmationToken {
-    @SequenceGenerator(name = "tokenConfirmation_sequence",sequenceName = "tokenConfirmation_sequence",allocationSize = 1)
+
+    @SequenceGenerator(
+            name = "confirmation_token_sequence",
+            sequenceName = "confirmation_token_sequence",
+            allocationSize = 1
+    )
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "tokenConfirmation_sequence")
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "confirmation_token_sequence"
+    )
     private Long id;
+
     @Column(nullable = false)
     private String token;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
     @Column(nullable = false)
     private LocalDateTime expiresAt;
-    private String confirmedAt;
-    @ManyToOne
-    @JoinColumn(nullable = false,name = "app_user_id")
-    private AppUser appUser; //now lets make it applicable to the society
 
-    public ConfirmationToken(String token, LocalDateTime createdAt, LocalDateTime expiresAt,
-                             AppUser appUser) {
-        this.token = token;
-        this.createdAt = createdAt;
-        this.expiresAt = expiresAt;
-        this.appUser = appUser;
-    }
+    private LocalDateTime confirmedAt;
+
+    @ManyToOne
+    @JoinColumn(
+            nullable = false,
+            name = "app_user_id"
+    )
+    private AppUser appUser;
 
     public String getToken() {
         return token;
@@ -36,14 +46,6 @@ public class ConfirmationToken {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public String getConfirmedAt() {
-        return confirmedAt;
-    }
-
-    public void setConfirmedAt(String confirmedAt) {
-        this.confirmedAt = confirmedAt;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -62,12 +64,29 @@ public class ConfirmationToken {
         this.expiresAt = expiresAt;
     }
 
+    public LocalDateTime getConfirmedAt() {
+        return confirmedAt;
+    }
+
+    public void setConfirmedAt(LocalDateTime confirmedAt) {
+        this.confirmedAt = confirmedAt;
+    }
 
     public AppUser getAppUser() {
         return appUser;
     }
 
     public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
+    }
+
+    public ConfirmationToken(String token,
+                             LocalDateTime createdAt,
+                             LocalDateTime expiresAt,
+                             AppUser appUser) {
+        this.token = token;
+        this.createdAt = createdAt;
+        this.expiresAt = expiresAt;
         this.appUser = appUser;
     }
 }

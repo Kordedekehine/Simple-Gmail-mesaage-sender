@@ -1,5 +1,6 @@
 package Project.demo.registration.token;
 
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,7 +28,3 @@ public class ConfirmationTokenService {
                 token, LocalDateTime.now());
     }
 }
-
-
-
-

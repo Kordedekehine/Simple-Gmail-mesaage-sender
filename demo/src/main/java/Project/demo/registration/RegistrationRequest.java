@@ -1,6 +1,7 @@
 package Project.demo.registration;
 
-import java.util.Objects;
+
+
 
 public class RegistrationRequest {
     private final String firstName;
@@ -29,19 +30,6 @@ public class RegistrationRequest {
 
     public String getPassword() {
         return password;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RegistrationRequest that = (RegistrationRequest) o;
-        return Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(email, that.email) && Objects.equals(password, that.password);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(firstName, lastName, email, password);
     }
 
     @Override
