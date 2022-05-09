@@ -1,5 +1,6 @@
 package Project.demo.security.config;
 
+import Project.demo.appUser.AppUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
