@@ -18,7 +18,7 @@ public class EmailSenderApplication {
 	@EventListener(ApplicationReadyEvent.class)
 	public void triggerEmail(){
 
-		senderService.sendSimpleEmail("salamikehinde345@gmail.com","I am sending this to you",
+		senderService.sendSimpleEmail("username@gmail.com","I am sending this to you",
 				"This is the email subject");
 	}
 }
